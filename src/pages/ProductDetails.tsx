@@ -17,12 +17,11 @@ import { motion } from 'motion/react';
 import { cn, formatCurrency } from '../lib/utils';
 import { useWishlist } from '../context/WishlistContext';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination, Navigation } from 'swiper/modules';
+import { Autoplay, Pagination } from 'swiper/modules';
 
 // Swiper styles
 import 'swiper/css';
 import 'swiper/css/pagination';
-import 'swiper/css/navigation';
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -100,10 +99,9 @@ export default function ProductDetails() {
           <div className="w-full">
             <div className="aspect-square rounded-[2rem] overflow-hidden bg-surface mb-10 border border-border-base/50 relative group shadow-sm">
               <Swiper
-                modules={[Autoplay, Pagination, Navigation]}
+                modules={[Autoplay, Pagination]}
                 autoplay={{ delay: 5000, disableOnInteraction: false }}
                 pagination={{ clickable: true }}
-                navigation={true}
                 className="h-full w-full"
               >
                 {displayImages.map((img, i) => (

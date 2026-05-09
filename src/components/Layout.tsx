@@ -44,8 +44,6 @@ function Navbar() {
 
   const navLinks = [
     { name: 'Collections', path: '/products' },
-    { name: 'Editorial', path: '#' },
-    { name: 'Records', path: '#' },
   ];
 
   return (
