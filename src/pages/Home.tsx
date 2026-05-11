@@ -34,7 +34,7 @@ export default function Home() {
         .select('*')
         .eq('is_new_arrival', true)
         .order('created_at', { ascending: false })
-        .limit(7);
+        .limit(10);
 
       const { data: under999Data } = await supabase
         .from('products')
@@ -98,7 +98,7 @@ export default function Home() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : 20 }}
                             transition={{ duration: 0.6, delay: 0.3 }}
-                            className="text-4xl font-display font-light mb-4 leading-tight tracking-tight text-white"
+                            className="text-3xl font-display font-light mb-3 leading-tight tracking-tight text-white line-clamp-2"
                           >
                             {product.title}
                           </motion.h1>
@@ -134,7 +134,7 @@ export default function Home() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : 20 }}
                             transition={{ duration: 0.6, delay: 0.3 }}
-                            className="text-5xl lg:text-7xl font-display font-light mb-8 leading-[1.05] tracking-tight text-text-base"
+                            className="text-4xl lg:text-6xl font-display font-light mb-6 leading-[1.1] tracking-tight text-text-base line-clamp-2"
                           >
                             {product.title}
                           </motion.h1>
@@ -142,7 +142,7 @@ export default function Home() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : 20 }}
                             transition={{ duration: 0.6, delay: 0.4 }}
-                            className="text-sm text-text-muted mb-12 max-w-sm leading-relaxed"
+                            className="text-sm text-text-muted mb-8 max-w-sm leading-relaxed"
                           >
                             A definitive statement in modern design and functional excellence. 
                           </motion.p>
@@ -201,12 +201,13 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8 auto-rows-[200px] md:auto-rows-[240px]">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8 auto-rows-[200px] md:auto-rows-[240px] grid-flow-dense">
           {latest.map((product, index) => {
             // Masonry Logic
             const isLarge = index === 0;
             const isTall = index === 2;
             const isWide = index === 5;
+            const isLast = index === latest.length - 1;
             
             return (
               <motion.div
@@ -217,9 +218,9 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 className={cn(
                   "group relative rounded-3xl overflow-hidden border border-border-base/50 bg-white transition-all duration-500 hover:shadow-2xl hover:shadow-text-base/5",
-                  isLarge && "col-span-2 row-span-1 lg:row-span-2",
+                  (isLarge || isLast) && "col-span-2 row-span-1 lg:row-span-2",
                   isTall && "row-span-2",
-                  isWide && "col-span-2"
+                  isWide && "lg:col-span-2"
                 )}
               >
                 <Link to={`/product/${product.id}`} className="block h-full w-full">
@@ -238,7 +239,7 @@ export default function Home() {
                         Latest Arrival
                       </span>
                       <h3 className={cn(
-                        "text-white font-display font-light tracking-tight leading-tight",
+                        "text-white font-display font-light tracking-tight leading-tight line-clamp-2",
                         isLarge ? "text-2xl md:text-3xl" : "text-lg md:text-xl"
                       )}>
                         {product.title}
@@ -303,7 +304,7 @@ export default function Home() {
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                   </div>
-                  <h4 className="text-xs font-semibold uppercase tracking-widest mb-2 px-4 group-hover:text-accent transition-colors">{product.title}</h4>
+                  <h4 className="text-xs font-semibold uppercase tracking-widest mb-2 px-4 group-hover:text-accent transition-colors line-clamp-2">{product.title}</h4>
                   <p className="text-[10px] text-text-muted font-bold tracking-widest">{formatCurrency(product.price)}</p>
                 </Link>
               ))

@@ -100,7 +100,7 @@ export default function Wishlist() {
                     {item.category}
                   </span>
                   <Link to={`/product/${item.id}`}>
-                    <h3 className="text-sm font-medium text-text-base group-hover:text-accent transition-colors mb-6">{item.title}</h3>
+                    <h3 className="text-sm font-medium text-text-base group-hover:text-accent transition-colors mb-6 line-clamp-2">{item.title}</h3>
                   </Link>
                 </div>
                 <div className="flex items-center justify-between border-t border-border-base/30 pt-6">

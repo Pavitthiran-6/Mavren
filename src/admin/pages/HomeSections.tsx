@@ -35,6 +35,15 @@ export default function HomeSections() {
   const toggleSection = async (product: Product, section: 'is_new_arrival' | 'is_under_999') => {
     const newValue = !product[section];
     
+    // Validation for New Arrivals Limit
+    if (section === 'is_new_arrival' && newValue) {
+      const currentNewArrivalsCount = products.filter(p => p.is_new_arrival).length;
+      if (currentNewArrivalsCount >= 10) {
+        alert("MAVREN LIMIT REACHED: Maximum 10 artifacts can be designated as New Arrivals simultaneously.");
+        return;
+      }
+    }
+
     // Validation for Under 999
     if (section === 'is_under_999' && newValue && product.price > 999) {
       alert("Product valuation must be ₹999 or less for this section.");
@@ -127,10 +136,12 @@ export default function HomeSections() {
               <div className="flex items-center justify-center sm:justify-end gap-10 shrink-0 w-full sm:w-auto mt-4 sm:mt-0 pt-6 sm:pt-0 border-t sm:border-t-0 border-border-base/50">
                 {/* New Arrival Toggle */}
                 <button
+                  disabled={!product.is_new_arrival && products.filter(p => p.is_new_arrival).length >= 10}
                   onClick={() => toggleSection(product, 'is_new_arrival')}
                   className={cn(
                     "flex flex-col items-center gap-3 transition-all",
-                    product.is_new_arrival ? "text-accent" : "text-text-muted opacity-40 grayscale hover:grayscale-0 hover:opacity-100"
+                    product.is_new_arrival ? "text-accent" : "text-text-muted opacity-40 grayscale hover:grayscale-0 hover:opacity-100",
+                    (!product.is_new_arrival && products.filter(p => p.is_new_arrival).length >= 10) && "cursor-not-allowed opacity-5"
                   )}
                 >
                   <div className={cn(
@@ -139,7 +150,9 @@ export default function HomeSections() {
                   )}>
                     <Plus size={20} />
                   </div>
-                  <span className="text-[9px] font-bold uppercase tracking-widest whitespace-nowrap">Arrivals</span>
+                  <span className="text-[9px] font-bold uppercase tracking-widest whitespace-nowrap">
+                    {!product.is_new_arrival && products.filter(p => p.is_new_arrival).length >= 10 ? 'Limit Reached' : 'Arrivals'}
+                  </span>
                 </button>
 
                 {/* Under 999 Toggle */}

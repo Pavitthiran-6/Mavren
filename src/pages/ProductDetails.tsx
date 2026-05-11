@@ -17,16 +17,19 @@ import { motion } from 'motion/react';
 import { cn, formatCurrency } from '../lib/utils';
 import { useWishlist } from '../context/WishlistContext';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination } from 'swiper/modules';
+import { Autoplay, Pagination, Thumbs, FreeMode } from 'swiper/modules';
 
 // Swiper styles
 import 'swiper/css';
 import 'swiper/css/pagination';
+import 'swiper/css/free-mode';
+import 'swiper/css/thumbs';
 
 export default function ProductDetails() {
   const { id } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
 
   useEffect(() => {
@@ -99,7 +102,9 @@ export default function ProductDetails() {
           <div className="w-full">
             <div className="aspect-square rounded-[2rem] overflow-hidden bg-surface mb-10 border border-border-base/50 relative group shadow-sm">
               <Swiper
-                modules={[Autoplay, Pagination]}
+                spaceBetween={10}
+                thumbs={{ swiper: thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null }}
+                modules={[Autoplay, Pagination, Thumbs]}
                 autoplay={{ delay: 5000, disableOnInteraction: false }}
                 pagination={{ clickable: true }}
                 className="h-full w-full"
@@ -115,6 +120,32 @@ export default function ProductDetails() {
                 ))}
               </Swiper>
             </div>
+
+            {/* Thumbnail Navigation */}
+            {displayImages.length > 1 && (
+              <div className="mb-10 max-w-[320px] md:max-w-[450px] mx-auto">
+                <Swiper
+                  onSwiper={setThumbsSwiper}
+                  spaceBetween={10}
+                  slidesPerView={4}
+                  freeMode={true}
+                  watchSlidesProgress={true}
+                  centerInsufficientSlides={true}
+                  modules={[FreeMode, Thumbs]}
+                  className="thumbs-swiper h-16 md:h-20"
+                >
+                  {displayImages.map((img, i) => (
+                    <SwiperSlide key={i} className="cursor-pointer rounded-xl overflow-hidden border-2 border-transparent aria-selected:border-accent transition-all">
+                      <img 
+                        src={img} 
+                        alt={`Thumbnail ${i + 1}`}
+                        className="w-full h-full object-cover opacity-60 hover:opacity-100 transition-opacity"
+                      />
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              </div>
+            )}
             {/* Metadata Tags */}
             <div className="flex flex-wrap gap-3">
               {tags.map((tag: string) => (
@@ -137,7 +168,7 @@ export default function ProductDetails() {
                 <span className="text-[9px] font-bold text-text-muted uppercase tracking-widest">Expert Verified</span>
               </div>
               
-              <h1 className="text-5xl md:text-6xl font-display font-light mb-4 leading-[1.05] tracking-tight text-text-base">
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-display font-light mb-4 leading-[1.15] md:leading-[1.05] tracking-tight text-text-base">
                 {product.title}
               </h1>
               <p className="text-sm font-bold uppercase tracking-[0.3em] text-text-base/40 mb-8">{product.category}</p>
@@ -252,7 +283,7 @@ export default function ProductDetails() {
               </div>
             </div>
           </div>
-
+ 
           {(pros.length > 0 || cons.length > 0) && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               <div className="bg-emerald-50/30 p-10 md:p-14 rounded-[3rem] border border-emerald-100/50">
@@ -271,7 +302,7 @@ export default function ProductDetails() {
                   ))}
                 </ul>
               </div>
-
+ 
               <div className="bg-red-50/20 p-10 md:p-14 rounded-[3rem] border border-red-100/30">
                 <h3 className="flex items-center gap-3 text-[10px] uppercase tracking-[0.4em] font-bold mb-10 text-red-700/50">
                   <XCircle size={18} className="text-red-400" />

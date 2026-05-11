@@ -119,7 +119,7 @@ export default function AdminInventory() {
   };
 
   const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
+    const files = Array.from(e.target.files || []) as File[];
     const validFiles = files.filter(file => {
       if (file.size > 5 * 1024 * 1024) {
         alert(`${file.name} exceeds 5MB and was skipped.`);
@@ -254,7 +254,7 @@ export default function AdminInventory() {
                 <img src={product.image_url} alt="" className="h-full w-full object-contain" />
               </div>
               <div className="min-w-0">
-                <p className="font-bold text-[11px] uppercase tracking-widest text-text-base mb-2 truncate">{product.title}</p>
+                <p className="font-bold text-[11px] uppercase tracking-widest text-text-base mb-2 line-clamp-2">{product.title}</p>
                 <div className="flex items-center gap-3">
                   <span className="text-[9px] text-text-muted uppercase tracking-[0.2em] font-bold">{product.category}</span>
                   {product.is_featured && (
@@ -311,7 +311,7 @@ export default function AdminInventory() {
                         <img src={product.image_url} alt="" className="h-full w-full object-contain" />
                       </div>
                       <div>
-                        <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-text-base mb-1 group-hover:text-accent transition-colors">{product.title}</p>
+                        <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-text-base mb-1 group-hover:text-accent transition-colors line-clamp-2">{product.title}</p>
                         <p className="text-[8px] text-text-muted uppercase tracking-widest font-bold">ARC-ID: {product.id.slice(0, 8)}</p>
                       </div>
                     </div>
@@ -514,7 +514,12 @@ export default function AdminInventory() {
                         <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-base leading-tight">Pin to Editorial Hero</span>
                       </label>
                       
-                      <label className="flex items-center gap-4 cursor-pointer group bg-surface/50 p-4 rounded-2xl border border-transparent hover:border-accent/20 transition-all">
+                      <label className={cn(
+                        "flex items-center gap-4 group p-4 rounded-2xl border transition-all bg-surface/50",
+                        (products.filter(p => p.is_new_arrival && p.id !== editingProduct?.id).length >= 10 && !formData.is_new_arrival) 
+                          ? "opacity-30 cursor-not-allowed border-transparent" 
+                          : "cursor-pointer border-transparent hover:border-accent/20"
+                      )}>
                         <div className={cn(
                           "w-6 h-6 rounded-full border flex items-center justify-center transition-all shrink-0",
                           formData.is_new_arrival ? "bg-accent border-accent text-white" : "border-border-base text-text-base/20 group-hover:border-accent/40"
@@ -524,10 +529,26 @@ export default function AdminInventory() {
                         <input 
                           type="checkbox" 
                           className="hidden"
+                          disabled={products.filter(p => p.is_new_arrival && p.id !== editingProduct?.id).length >= 10 && !formData.is_new_arrival}
                           checked={formData.is_new_arrival}
-                          onChange={e => setFormData({...formData, is_new_arrival: e.target.checked})}
+                          onChange={e => {
+                            const isChecking = e.target.checked;
+                            if (isChecking) {
+                              const currentCount = products.filter(p => p.is_new_arrival && p.id !== editingProduct?.id).length;
+                              if (currentCount >= 10) {
+                                alert("MAVREN LIMIT REACHED: Maximum 10 artifacts can be designated as New Arrivals simultaneously.");
+                                return;
+                              }
+                            }
+                            setFormData({...formData, is_new_arrival: isChecking});
+                          }}
                         />
-                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-base leading-tight">New Arrival Section</span>
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-base leading-tight">New Arrival Section</span>
+                          {(products.filter(p => p.is_new_arrival && p.id !== editingProduct?.id).length >= 10 && !formData.is_new_arrival) && (
+                            <span className="text-[8px] text-red-500 font-bold uppercase tracking-widest mt-1">Limit Reached</span>
+                          )}
+                        </div>
                       </label>
 
                       <label className={cn(

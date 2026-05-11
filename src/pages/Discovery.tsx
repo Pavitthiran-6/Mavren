@@ -235,7 +235,7 @@ export default function Discovery() {
                         <span className="text-[9px] text-text-muted uppercase font-bold tracking-[0.2em] mb-2 block">
                           {categories.find(c => c.id === product.category_id)?.name || 'General Selection'}
                         </span>
-                        <h3 className="text-sm font-medium text-text-base group-hover:text-accent transition-colors truncate">
+                        <h3 className="text-sm font-medium text-text-base group-hover:text-accent transition-colors line-clamp-2">
                           {product.title}
                         </h3>
                       </Link>

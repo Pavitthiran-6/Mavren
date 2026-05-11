@@ -98,7 +98,7 @@ export default function AdminCuration() {
                   
                   <div className="flex-grow text-center sm:text-left min-w-0 max-w-full">
                     <div className="flex flex-col sm:flex-row items-center sm:items-baseline gap-3 mb-2 justify-center sm:justify-start">
-                      <p className="font-bold text-[11px] uppercase tracking-widest text-text-base leading-none break-words">{product.title}</p>
+                      <p className="font-bold text-[11px] uppercase tracking-widest text-text-base leading-none break-words line-clamp-1">{product.title}</p>
                       <span className="text-[8px] font-bold uppercase px-2 py-0.5 rounded-full bg-accent/5 text-accent border border-accent/10 tracking-widest leading-none shrink-0 italic">Spotlight</span>
                     </div>
                     <p className="text-[9px] text-text-muted font-bold uppercase tracking-[0.2em] break-words">{product.category} • Record {product.id.substring(0, 4)}</p>
@@ -161,7 +161,7 @@ export default function AdminCuration() {
                   </div>
                   
                   <div className="flex-grow text-center sm:text-left w-full min-w-0">
-                    <p className="font-bold text-[10px] uppercase tracking-widest text-text-base mb-2 break-words">{prod.title}</p>
+                    <p className="font-bold text-[10px] uppercase tracking-widest text-text-base mb-2 break-words line-clamp-1">{prod.title}</p>
                     <p className="text-[8px] text-text-muted font-bold uppercase tracking-[0.2em] break-words">{prod.category} • In Stock</p>
                   </div>
                   
