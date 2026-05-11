@@ -45,6 +45,7 @@ export default function AdminInventory() {
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [existingGalleryUrls, setExistingGalleryUrls] = useState<string[]>([]);
 
   useEffect(() => {
     fetchData();
@@ -105,6 +106,7 @@ export default function AdminInventory() {
     }
     setCoverFile(null);
     setGalleryFiles([]);
+    setExistingGalleryUrls(product?.gallery_images ? product.gallery_images.split(',').filter(Boolean) : []);
     setIsModalOpen(true);
   };
 
@@ -134,6 +136,23 @@ export default function AdminInventory() {
     setGalleryFiles(prev => prev.filter((_, i) => i !== index));
   };
 
+  const deleteStorageFiles = async (urls: string[]) => {
+    try {
+      const paths = urls.map(url => {
+        // Extract the path after /public/product-images/
+        const parts = url.split('/product-images/');
+        return parts.length > 1 ? parts[1] : null;
+      }).filter(Boolean) as string[];
+
+      if (paths.length > 0) {
+        const { error } = await supabase.storage.from('product-images').remove(paths);
+        if (error) console.error('Storage Cleanup Error:', error);
+      }
+    } catch (err) {
+      console.error('Failed to clean up storage:', err);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setUploading(true);
@@ -141,7 +160,7 @@ export default function AdminInventory() {
 
     try {
       let finalCoverUrl = editingProduct?.cover_image_url || editingProduct?.image_url || '';
-      let finalGalleryUrls = editingProduct?.gallery_images ? editingProduct.gallery_images.split(',').filter(Boolean) : [];
+      let finalGalleryUrls = [...existingGalleryUrls];
 
       // 1. Handle Cover Upload
       if (coverFile) {
@@ -202,6 +221,25 @@ export default function AdminInventory() {
       if (updatedProduct) {
         if (editingProduct) setProducts(prev => prev.map(p => p.id === updatedProduct!.id ? updatedProduct! : p));
         else setProducts(prev => [updatedProduct!, ...prev]);
+      }
+
+      // 3. Handle Storage Cleanup (Delete orphaned files)
+      if (editingProduct) {
+        const filesToDelete: string[] = [];
+        
+        // If cover changed, delete old one
+        if (coverFile && (editingProduct.cover_image_url || editingProduct.image_url)) {
+          filesToDelete.push(editingProduct.cover_image_url || editingProduct.image_url);
+        }
+
+        // If gallery images were removed, delete them
+        const originalGallery = editingProduct.gallery_images ? editingProduct.gallery_images.split(',').filter(Boolean) : [];
+        const removedGalleryFiles = originalGallery.filter(url => !existingGalleryUrls.includes(url));
+        filesToDelete.push(...removedGalleryFiles);
+
+        if (filesToDelete.length > 0) {
+          await deleteStorageFiles(filesToDelete);
+        }
       }
 
       setIsModalOpen(false);
@@ -411,12 +449,20 @@ export default function AdminInventory() {
                     <div className="space-y-4">
                       <label className="block text-[9px] uppercase tracking-[0.2em] font-bold text-text-base/40 ml-1">Gallery Artifacts</label>
                       <div className="grid grid-cols-3 gap-4">
-                        {/* Existing/Pending Gallery Previews */}
-                        {editingProduct?.gallery_images?.split(',').filter(Boolean).map((url, i) => (
-                          <div key={`existing-${i}`} className="aspect-square rounded-xl bg-surface border border-border-base overflow-hidden">
-                            <img src={url} className="h-full w-full object-cover opacity-50" />
+                        {/* Existing Gallery Previews */}
+                        {existingGalleryUrls.map((url, i) => (
+                          <div key={`existing-${i}`} className="aspect-square rounded-xl bg-surface border border-border-base overflow-hidden relative group">
+                            <img src={url} className="h-full w-full object-cover" />
+                            <button 
+                              type="button"
+                              onClick={() => setExistingGalleryUrls(prev => prev.filter((_, idx) => idx !== i))}
+                              className="absolute inset-0 bg-red-600/80 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                            >
+                              <Trash2 size={16} />
+                            </button>
                           </div>
                         ))}
+                        {/* New Gallery Previews */}
                         {galleryFiles.map((file, i) => (
                           <div key={`new-${i}`} className="aspect-square rounded-xl bg-accent/5 border border-accent/20 overflow-hidden relative group">
                             <img src={URL.createObjectURL(file)} className="h-full w-full object-cover" />
@@ -609,7 +655,7 @@ export default function AdminInventory() {
                   
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                       <div className="space-y-4">
-                        <label className="block text-[9px] uppercase tracking-[0.2em] font-bold text-accent ml-1">Design Highs (Metadata)</label>
+                        <label className="block text-[9px] uppercase tracking-[0.2em] font-bold text-accent ml-1">Key Highlights (Metadata)</label>
                         <input 
                           className="w-full bg-transparent border-b border-accent/20 px-0 py-4 text-[10px] font-bold uppercase tracking-widest focus:border-accent outline-none transition-all" 
                           placeholder="MATERIALITY, FORM, FUNCTION"
@@ -618,7 +664,7 @@ export default function AdminInventory() {
                         />
                       </div>
                       <div className="space-y-4">
-                        <label className="block text-[9px] uppercase tracking-[0.2em] font-bold text-text-base/30 ml-1">Design Lows (Metadata)</label>
+                        <label className="block text-[9px] uppercase tracking-[0.2em] font-bold text-text-base/30 ml-1">Key Considerations (Metadata)</label>
                         <input 
                           className="w-full bg-transparent border-b border-border-base px-0 py-4 text-[10px] font-bold uppercase tracking-widest focus:border-accent outline-none transition-all text-text-base/40" 
                           placeholder="LIMITATIONS, FRICTION"
@@ -630,7 +676,7 @@ export default function AdminInventory() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                       <div className="space-y-4">
-                        <label className="block text-[9px] uppercase tracking-[0.2em] font-bold text-emerald-600 ml-1">Pros (Comma Separated)</label>
+                        <label className="block text-[9px] uppercase tracking-[0.2em] font-bold text-emerald-600 ml-1">Key Strengths (Comma Separated)</label>
                         <input 
                           className="w-full bg-transparent border-b border-emerald-600/20 px-0 py-4 text-[10px] font-bold uppercase tracking-widest focus:border-emerald-600 outline-none transition-all" 
                           placeholder="ADAVANTAGE 1, ADVANTAGE 2"
@@ -639,7 +685,7 @@ export default function AdminInventory() {
                         />
                       </div>
                       <div className="space-y-4">
-                        <label className="block text-[9px] uppercase tracking-[0.2em] font-bold text-red-600/40 ml-1">Cons (Comma Separated)</label>
+                        <label className="block text-[9px] uppercase tracking-[0.2em] font-bold text-red-600/40 ml-1">Main Limitations (Comma Separated)</label>
                         <input 
                           className="w-full bg-transparent border-b border-border-base px-0 py-4 text-[10px] font-bold uppercase tracking-widest focus:border-red-600 outline-none transition-all text-text-base/40" 
                           placeholder="DRAWBACK 1, DRAWBACK 2"

@@ -71,9 +71,32 @@ export default function ProductDetails() {
 
   const isLiked = isInWishlist(product.id);
 
-    const parseMeta = (val: any) => {
-      if (Array.isArray(val)) return val;
-      if (typeof val === 'string') return val.split(',').map((t: string) => t.trim()).filter(Boolean);
+    const parseMeta = (val: any): string[] => {
+      if (!val) return [];
+      
+      // Handle actual arrays
+      if (Array.isArray(val)) {
+        return val.map(item => String(item).replace(/[\[\]"'\\]/g, '').trim()).filter(Boolean);
+      }
+
+      if (typeof val === 'string') {
+        // Try parsing JSON if it looks like it
+        if (val.trim().startsWith('[') || val.trim().startsWith('{')) {
+          try {
+            const parsed = JSON.parse(val);
+            return parseMeta(parsed);
+          } catch (e) {
+            // Fall through to string splitting if parse fails
+          }
+        }
+
+        // Handle comma separated strings or messy JSON-like strings
+        return val
+          .split(/,|\n/)
+          .map(item => item.replace(/[\[\]"'\\]/g, '').trim())
+          .filter(Boolean);
+      }
+
       return [];
     };
 
@@ -247,7 +270,7 @@ export default function ProductDetails() {
               <div className="bg-surface p-10 rounded-[2rem] border border-border-base/50">
                 <h3 className="flex items-center gap-3 text-[10px] uppercase tracking-[0.2em] font-bold mb-8 text-accent">
                   <CheckCircle2 size={16} />
-                  Design Highs
+                  Key Highlights
                 </h3>
                 <ul className="space-y-6">
                   {highs.length > 0 ? (
@@ -266,7 +289,7 @@ export default function ProductDetails() {
               <div className="bg-surface p-10 rounded-[2rem] border border-border-base/50">
                 <h3 className="flex items-center gap-3 text-[10px] uppercase tracking-[0.2em] font-bold mb-8 text-text-base/30">
                   <XCircle size={16} />
-                  Design Lows
+                  Key Considerations
                 </h3>
                 <ul className="space-y-6">
                   {lows.length > 0 ? (
@@ -289,7 +312,7 @@ export default function ProductDetails() {
               <div className="bg-emerald-50/30 p-10 md:p-14 rounded-[3rem] border border-emerald-100/50">
                 <h3 className="flex items-center gap-3 text-[10px] uppercase tracking-[0.4em] font-bold mb-10 text-emerald-700">
                   <CheckCircle2 size={18} className="text-emerald-500" />
-                  Key Pros
+                  Key Strengths
                 </h3>
                 <ul className="grid grid-cols-1 gap-6">
                   {pros.map((item: string, index: number) => (
@@ -306,7 +329,7 @@ export default function ProductDetails() {
               <div className="bg-red-50/20 p-10 md:p-14 rounded-[3rem] border border-red-100/30">
                 <h3 className="flex items-center gap-3 text-[10px] uppercase tracking-[0.4em] font-bold mb-10 text-red-700/50">
                   <XCircle size={18} className="text-red-400" />
-                  Key Cons
+                  Main Limitations
                 </h3>
                 <ul className="grid grid-cols-1 gap-6">
                   {cons.map((item: string, index: number) => (
