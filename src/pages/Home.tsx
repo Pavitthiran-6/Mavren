@@ -205,7 +205,8 @@ export default function Home() {
           {latest.map((product, index) => {
             // Masonry Logic
             const isLarge = index === 0;
-            const isTall = index === 2;
+            const isTallLG = index === 2 || index === 7;
+            const isTallSM = index === 2 || index === 6;
             const isWide = index === 5;
             const isLast = index === latest.length - 1;
             
@@ -218,9 +219,13 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 className={cn(
                   "group relative rounded-3xl overflow-hidden border border-border-base/50 bg-white transition-all duration-500 hover:shadow-2xl hover:shadow-text-base/5",
-                  (isLarge || isLast) && "col-span-2 row-span-1 lg:row-span-2",
-                  isTall && "row-span-2",
-                  isWide && "lg:col-span-2"
+                  isLarge && "col-span-2 row-span-1 lg:row-span-2",
+                  isTallLG && "lg:row-span-2",
+                  isTallSM && "row-span-2",
+                  (!isTallLG && !isLarge && !isLast) && "lg:row-span-1", // Reset if not tall on desktop
+                  (!isTallSM && !isLarge && !isLast) && "row-span-1", // Reset if not tall on mobile
+                  isWide && "lg:col-span-2",
+                  isLast && "col-span-2 row-span-1 lg:row-span-2"
                 )}
               >
                 <Link to={`/product/${product.id}`} className="block h-full w-full">
